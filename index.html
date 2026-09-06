@@ -59,8 +59,7 @@
   }
   .btn:hover{ border-color:var(--amber); background: rgba(224,170,95,0.1); }
 
-  .pw-hint{ font-size:0.9rem; font-weight:300; color:var(--dim); max-width:30ch; line-height:1.6; margin:0 0 34px; }
-  .pw-form{ display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .pw-form{ display:flex; flex-direction:column; align-items:center; gap:18px; margin-top:36px; }
   .pw-input{
     width: min(320px, 78vw);
     padding:14px 18px;
@@ -141,20 +140,18 @@
   }
   .orbit-group{ transform-origin: 625px 120px; animation: orbitSpin 40s linear infinite; }
 
-  @keyframes flowDown{
-    0%{ transform: translateY(-40px); opacity:0; }
-    15%{ opacity:0.9; }
-    85%{ opacity:0.9; }
-    100%{ transform: translateY(420px); opacity:0; }
-  }
-  .flow-streak{ animation: flowDown 3s linear infinite; }
+  .door{ transition: transform 1.4s cubic-bezier(.65,0,.35,1); }
+  .door-left{ transform: translateX(0); }
+  .door-right{ transform: translateX(0); }
+  .scene.open .door-left{ transform: translateX(-160px); }
+  .scene.open .door-right{ transform: translateX(160px); }
 
   @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
 </style>
 </head>
 <body>
 
-<div class="scene">
+<div class="scene" id="scene">
   <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
     <circle class="star" cx="80" cy="60" r="1.2" fill="#f2e8d5" opacity="0.5"/>
     <circle class="star" cx="150" cy="110" r="1" fill="#f2e8d5" opacity="0.4" style="animation-delay:0.5s"/>
@@ -179,17 +176,10 @@
         <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
         <stop offset="100%" stop-color="#0a0704" stop-opacity="1"/>
       </linearGradient>
-      <clipPath id="beamClip"><rect x="392" y="30" width="16" height="440"/></clipPath>
     </defs>
     <circle class="eclipse-glow" cx="400" cy="330" r="120" fill="url(#eclipse)"/>
-    <circle cx="400" cy="330" r="58" fill="#0a0704"/>
-    <line x1="400" y1="30" x2="400" y2="470" stroke="#f2e8d5" stroke-width="1" opacity="0.4"/>
-    <g clip-path="url(#beamClip)">
-      <rect class="flow-streak" x="396" y="30" width="8" height="60" fill="#f0d29a" opacity="0.5" style="animation-delay:0s"/>
-      <rect class="flow-streak" x="396" y="30" width="8" height="60" fill="#f0d29a" opacity="0.5" style="animation-delay:1.5s"/>
-    </g>
-    <path d="M300 250 L365 260 L365 480 L300 480 Z" fill="#181209" stroke="#3a2c18" stroke-width="0.5"/>
-    <path d="M500 250 L435 260 L435 480 L500 480 Z" fill="#181209" stroke="#3a2c18" stroke-width="0.5"/>
+    <path class="door door-left" d="M250 190 L400 190 L400 480 L250 480 Z" fill="#161009" stroke="#3a2c18" stroke-width="0.6"/>
+    <path class="door door-right" d="M550 190 L400 190 L400 480 L550 480 Z" fill="#161009" stroke="#3a2c18" stroke-width="0.6"/>
     <polygon points="0,480 90,410 170,460 260,400 340,480" fill="#120d07"/>
     <polygon points="460,480 540,400 620,455 700,405 800,480" fill="#120d07"/>
     <polygon points="0,500 120,440 220,485 330,435 420,500" fill="#0d0a05"/>
@@ -197,9 +187,6 @@
     <rect x="0" y="480" width="800" height="120" fill="#0a0704"/>
     <g opacity="0.16" transform="translate(0,960) scale(1,-1)">
       <circle cx="400" cy="330" r="120" fill="url(#eclipse)"/>
-      <path d="M300 250 L365 260 L365 480 L300 480 Z" fill="#181209"/>
-      <path d="M500 250 L435 260 L435 480 L500 480 Z" fill="#181209"/>
-      <line x1="400" y1="60" x2="400" y2="470" stroke="#f2e8d5" stroke-width="1"/>
     </g>
     <rect x="0" y="480" width="800" height="120" fill="url(#reflect)"/>
   </svg>
@@ -216,8 +203,7 @@
 
   <section class="screen screen2" id="screen2">
     <p class="eyebrow">Access verification</p>
-    <p class="prompt-name">Enter access coordinates</p>
-    <p class="pw-hint">Find them on your pass — and beside the signal you just scanned.</p>
+    <p class="prompt-name">Coordinates open the door.</p>
     <form class="pw-form" id="pwForm">
       <input class="pw-input" id="pwInput" type="text" placeholder="00.0000&deg; N, 00.0000&deg; E" autocomplete="off" spellcheck="false">
       <p class="pw-error" id="pwError">Access denied. Check the coordinates.</p>
@@ -288,16 +274,17 @@
     var raw = input.value.toLowerCase().replace(/[^0-9a-z.]/g, '');
     var ok = raw.indexOf('37.9838') !== -1 && raw.indexOf('23.7275') !== -1;
     if(ok){
-      showScreen('screen3');
+      document.getElementById('scene').classList.add('open');
       setTimeout(function(){
+        showScreen('screen3');
         document.getElementById('maskWrap').classList.add('show');
-      }, 150);
+      }, 1200);
       setTimeout(function(){
         document.getElementById('maskLabel').classList.add('show');
-      }, 900);
+      }, 1950);
       setTimeout(function(){
         showScreen('screen4');
-      }, 2800);
+      }, 3800);
     } else {
       document.getElementById('pwError').classList.add('show');
       input.classList.remove('error');

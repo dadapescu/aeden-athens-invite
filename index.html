@@ -1,216 +1,336 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Pass</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <style>
-      :root{
-            --void: #060606;
-            --paper: #f2f1ed;
-            --dim: #8f8e86;
-            --line: rgba(242,241,237,0.15);
-      }
-      *{ box-sizing: border-box; }
-      html,body{
-            margin:0; padding:0;
-            background: var(--void);
-            color: var(--paper);
-            font-family: 'Space Grotesk', sans-serif;
-            overflow-x: hidden;
-      }
-      body{ min-height:100vh; position:relative; }
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Access Pass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void: #0a0704;
+    --paper: #f2e8d5;
+    --dim: #9c8a68;
+    --amber: #e0aa5f;
+    --amber-dim: #8a5f2e;
+    --line: rgba(242,232,213,0.15);
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0;
+    background: var(--void);
+    color: var(--paper);
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+  }
+  body{ min-height:100vh; position:relative; }
 
-      .scene{ position:fixed; inset:0; z-index:0; pointer-events:none; }
-      .scene svg{ width:100%; height:100%; }
-      .vignette{
-            position:fixed; inset:0; z-index:1; pointer-events:none;
-            background: radial-gradient(ellipse at 50% 35%, transparent 35%, var(--void) 92%);
-      }
+  .scene{ position:fixed; inset:0; z-index:0; pointer-events:none; }
+  .scene svg{ width:100%; height:100%; }
+  .vignette{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background: radial-gradient(ellipse at 50% 35%, transparent 35%, var(--void) 92%);
+  }
 
-      .wrap{ position:relative; z-index:2; min-height:100vh; }
-      .screen{
-            position:absolute; inset:0;
-            display:flex; flex-direction:column; align-items:center; justify-content:center;
-            text-align:center; padding: 32px 28px;
-            opacity:0; pointer-events:none;
-            transition: opacity 0.8s ease;
-      }
-      .screen.active{ opacity:1; pointer-events:auto; }
+  .wrap{ position:relative; z-index:2; min-height:100vh; }
+  .screen{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding: 32px 28px;
+    opacity:0; pointer-events:none;
+    transition: opacity 0.8s ease;
+  }
+  .screen.active{ opacity:1; pointer-events:auto; }
 
-      .eyebrow{ font-size:0.75rem; font-weight:400; letter-spacing:0.35em; color:var(--dim); margin:0 0 28px; }
-      .prompt-name{ font-size:1.6rem; font-weight:500; margin:0 0 14px; }
-      .prompt-q{ font-size:1.1rem; font-weight:300; max-width:28ch; line-height:1.6; margin:0 0 48px; }
+  .eyebrow{ font-size:0.75rem; font-weight:400; letter-spacing:0.35em; color:var(--dim); margin:0 0 28px; }
+  .prompt-name{ font-size:1.6rem; font-weight:500; margin:0 0 14px; }
+  .prompt-q{ font-size:1.1rem; font-weight:300; max-width:28ch; line-height:1.6; margin:0 0 48px; }
 
-      .btn{
-            display:inline-flex; align-items:center; gap:10px;
-            padding:15px 40px;
-            border:1px solid rgba(242,241,237,0.35);
-            color:var(--paper); background:transparent;
-            text-decoration:none;
-            font-family:inherit; font-size:0.9rem; letter-spacing:0.12em;
-            cursor:pointer;
-            transition: background 0.3s ease, border-color 0.3s ease;
-      }
-      .btn:hover{ border-color:var(--paper); background: rgba(242,241,237,0.08); }
+  .btn{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:15px 40px;
+    border:1px solid rgba(224,170,95,0.4);
+    color:var(--paper); background:transparent;
+    text-decoration:none;
+    font-family:inherit; font-size:0.9rem; letter-spacing:0.12em;
+    cursor:pointer;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+  .btn:hover{ border-color:var(--amber); background: rgba(224,170,95,0.1); }
 
-      .invite-line{ font-size:0.8rem; font-weight:400; letter-spacing:0.3em; color:var(--dim); margin:0 0 22px; opacity:0; transform:translateY(6px); transition: opacity 0.9s ease, transform 0.9s ease; }
-      .presents{ font-size:0.8rem; font-weight:300; letter-spacing:0.3em; color:var(--dim); margin:0 0 6px; opacity:0; transition: opacity 1s ease; }
-      .wordmark{ font-size:clamp(3rem,15vw,5.2rem); font-weight:700; letter-spacing:-0.01em; line-height:0.95; margin:0; opacity:0; filter:blur(6px); transition: opacity 1.4s cubic-bezier(.16,1,.3,1), filter 1.4s cubic-bezier(.16,1,.3,1); }
-      .place{ font-size:clamp(1rem,3vw,1.25rem); font-weight:300; letter-spacing:0.35em; color:var(--dim); margin:10px 0 0; opacity:0; transition: opacity 1s ease; }
+  .pw-hint{ font-size:0.9rem; font-weight:300; color:var(--dim); max-width:30ch; line-height:1.6; margin:0 0 34px; }
+  .pw-form{ display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .pw-input{
+    width: min(320px, 78vw);
+    padding:14px 18px;
+    background: rgba(242,232,213,0.04);
+    border:1px solid rgba(242,232,213,0.25);
+    color: var(--paper);
+    font-family:inherit; font-size:0.95rem; letter-spacing:0.03em;
+    text-align:center;
+    outline:none;
+  }
+  .pw-input:focus{ border-color: var(--amber); }
+  .pw-input.error{ animation: shake 0.5s; border-color: var(--amber); }
+  .pw-error{ font-size:0.8rem; color:var(--amber); opacity:0; height:14px; margin:0; letter-spacing:0.05em; }
+  .pw-error.show{ opacity:1; }
+  @keyframes shake{
+    10%,90%{ transform:translateX(-2px); }
+    20%,80%{ transform:translateX(4px); }
+    30%,50%,70%{ transform:translateX(-8px); }
+    40%,60%{ transform:translateX(8px); }
+  }
 
-      .divider{ width:1px; height:56px; background: linear-gradient(to bottom, transparent, var(--line)); margin:42px 0; opacity:0; transition: opacity 1s ease; }
+  .mask-wrap{ opacity:0; transform: scale(0.92); filter: blur(6px); transition: opacity 1s ease, transform 1s ease, filter 1s ease; }
+  .mask-wrap.show{ opacity:1; transform:scale(1); filter: blur(0); }
+  .mask-wrap svg{ width:150px; height:150px; }
+  .mask-label{ margin-top:26px; font-size:0.8rem; letter-spacing:0.3em; color:var(--amber); opacity:0; transition: opacity 1s ease 0.6s; }
+  .mask-label.show{ opacity:1; }
 
-      .details{ opacity:0; transition: opacity 1s ease; }
-      .date{ font-size:1.3rem; font-weight:500; letter-spacing:0.04em; }
-      .meta{ margin-top:10px; font-size:0.9rem; font-weight:300; color:var(--dim); line-height:1.7; }
+  .invite-line{ font-size:0.8rem; font-weight:400; letter-spacing:0.3em; color:var(--dim); margin:0 0 22px; opacity:0; transform:translateY(6px); transition: opacity 0.9s ease, transform 0.9s ease; }
+  .presents{ font-size:0.8rem; font-weight:300; letter-spacing:0.3em; color:var(--dim); margin:0 0 6px; opacity:0; transition: opacity 1s ease; }
+  .wordmark{ font-size:clamp(3rem,15vw,5.2rem); font-weight:700; letter-spacing:-0.01em; line-height:0.95; margin:0; opacity:0; filter:blur(6px); transition: opacity 1.4s cubic-bezier(.16,1,.3,1), filter 1.4s cubic-bezier(.16,1,.3,1); }
+  .place{ font-size:clamp(1rem,3vw,1.25rem); font-weight:300; letter-spacing:0.35em; color:var(--dim); margin:10px 0 0; opacity:0; transition: opacity 1s ease; }
 
-      .countdown{ display:flex; gap:20px; margin:40px 0 0; opacity:0; transition: opacity 1s ease; }
-      .unit{ display:flex; flex-direction:column; align-items:center; min-width:52px; position:relative; }
-      .unit:not(:last-child)::after{ content:''; position:absolute; right:-10px; top:6px; width:1px; height:24px; background:var(--line); }
-      .unit-num{ font-size:1.7rem; font-weight:500; font-variant-numeric:tabular-nums; }
-      .unit-label{ font-size:0.62rem; font-weight:300; letter-spacing:0.16em; color:var(--dim); margin-top:5px; }
+  .divider{ width:1px; height:56px; background: linear-gradient(to bottom, transparent, var(--line)); margin:42px 0; opacity:0; transition: opacity 1s ease; }
 
-      .cta{ margin-top:50px; opacity:0; transition: opacity 1s ease; }
+  .details{ opacity:0; transition: opacity 1s ease; }
+  .date{ font-size:1.3rem; font-weight:500; letter-spacing:0.04em; }
+  .meta{ margin-top:10px; font-size:0.9rem; font-weight:300; color:var(--dim); line-height:1.7; }
 
-      .barcode{ display:flex; gap:2px; align-items:flex-end; height:20px; margin-top:28px; opacity:0; transition: opacity 1s ease; }
-      .barcode span{ width:2px; background: rgba(242,241,237,0.3); }
+  .countdown{ display:flex; gap:20px; margin:40px 0 0; opacity:0; transition: opacity 1s ease; }
+  .unit{ display:flex; flex-direction:column; align-items:center; min-width:52px; position:relative; }
+  .unit:not(:last-child)::after{ content:''; position:absolute; right:-10px; top:6px; width:1px; height:24px; background:var(--line); }
+  .unit-num{ font-size:1.7rem; font-weight:500; font-variant-numeric:tabular-nums; }
+  .unit-label{ font-size:0.62rem; font-weight:300; letter-spacing:0.16em; color:var(--dim); margin-top:5px; }
 
-      .footer{ margin-top:22px; font-size:0.78rem; font-weight:300; color: rgba(143,142,134,0.6); letter-spacing:0.03em; opacity:0; transition: opacity 1s ease; }
+  .cta{ margin-top:50px; opacity:0; transition: opacity 1s ease; }
 
-      .screen2.active .invite-line{ opacity:1; transform:translateY(0); transition-delay:0.2s; }
-      .screen2.active .presents{ opacity:1; transition-delay:0.9s; }
-      .screen2.active .wordmark{ opacity:1; filter:blur(0); transition-delay:1s; }
-      .screen2.active .place{ opacity:1; transition-delay:1.7s; }
-      .screen2.active .divider{ opacity:1; transition-delay:2.1s; }
-      .screen2.active .details{ opacity:1; transition-delay:2.3s; }
-      .screen2.active .countdown{ opacity:1; transition-delay:2.5s; }
-      .screen2.active .cta{ opacity:1; transition-delay:2.7s; }
-      .screen2.active .barcode{ opacity:1; transition-delay:2.9s; }
-      .screen2.active .footer{ opacity:1; transition-delay:3.1s; }
+  .barcode{ display:flex; gap:2px; align-items:flex-end; height:20px; margin-top:28px; opacity:0; transition: opacity 1s ease; }
+  .barcode span{ width:2px; background: rgba(224,170,95,0.35); }
 
-      @media (prefers-reduced-motion: reduce){ *{ transition-duration:0.01ms !important; } }
-    </style>
-  </head>
-  <body>
+  .footer{ margin-top:22px; font-size:0.78rem; font-weight:300; color: rgba(156,138,104,0.65); letter-spacing:0.03em; opacity:0; transition: opacity 1s ease; }
 
-    <div class="scene">
-        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
-              <circle cx="80" cy="60" r="1.2" fill="#f2f1ed" opacity="0.6"/>
-              <circle cx="150" cy="110" r="1" fill="#f2f1ed" opacity="0.4"/>
-              <circle cx="240" cy="50" r="1.4" fill="#f2f1ed" opacity="0.5"/>
-              <circle cx="560" cy="70" r="1" fill="#f2f1ed" opacity="0.5"/>
-              <circle cx="700" cy="120" r="1.3" fill="#f2f1ed" opacity="0.4"/>
-              <circle cx="650" cy="180" r="1" fill="#f2f1ed" opacity="0.3"/>
-              <circle cx="120" cy="200" r="1" fill="#f2f1ed" opacity="0.3"/>
-              <circle cx="330" cy="90" r="1" fill="#f2f1ed" opacity="0.4"/>
-              <circle cx="480" cy="40" r="1" fill="#f2f1ed" opacity="0.4"/>
-              <path d="M560 150 A 90 90 0 0 1 690 90" fill="none" stroke="#8f8e86" stroke-width="0.5" stroke-dasharray="2 4" opacity="0.5"/>
-              <circle cx="690" cy="90" r="3" fill="#f2f1ed" opacity="0.7"/>
-              <defs>
-                      <radialGradient id="eclipse" cx="50%" cy="50%" r="50%">
-                                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
-                                <stop offset="55%" stop-color="#ffffff" stop-opacity="0.25"/>
-                                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-                      </radialGradient>
-                      <linearGradient id="reflect" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
-                                <stop offset="100%" stop-color="#060606" stop-opacity="1"/>
-                      </linearGradient>
-              </defs>
-              <circle cx="400" cy="330" r="120" fill="url(#eclipse)"/>
-              <circle cx="400" cy="330" r="58" fill="#060606"/>
-              <line x1="400" y1="30" x2="400" y2="470" stroke="#f2f1ed" stroke-width="1" opacity="0.55"/>
-              <path d="M300 250 L365 260 L365 480 L300 480 Z" fill="#131313" stroke="#2a2a2a" stroke-width="0.5"/>
-              <path d="M500 250 L435 260 L435 480 L500 480 Z" fill="#131313" stroke="#2a2a2a" stroke-width="0.5"/>
-              <polygon points="0,480 90,410 170,460 260,400 340,480" fill="#101010"/>
-              <polygon points="460,480 540,400 620,455 700,405 800,480" fill="#101010"/>
-              <polygon points="0,500 120,440 220,485 330,435 420,500" fill="#0b0b0b"/>
-              <polygon points="380,500 480,435 590,490 680,430 800,500" fill="#0b0b0b"/>
-              <rect x="0" y="480" width="800" height="120" fill="#060606"/>
-              <g opacity="0.18" transform="translate(0,960) scale(1,-1)">
-                      <circle cx="400" cy="330" r="120" fill="url(#eclipse)"/>
-                      <path d="M300 250 L365 260 L365 480 L300 480 Z" fill="#131313"/>
-                      <path d="M500 250 L435 260 L435 480 L500 480 Z" fill="#131313"/>
-                      <line x1="400" y1="60" x2="400" y2="470" stroke="#f2f1ed" stroke-width="1"/>
-              </g>
-              <rect x="0" y="480" width="800" height="120" fill="url(#reflect)"/>
-        </svg>
+  .screen4.active .invite-line{ opacity:1; transform:translateY(0); transition-delay:0.2s; }
+  .screen4.active .presents{ opacity:1; transition-delay:0.9s; }
+  .screen4.active .wordmark{ opacity:1; filter:blur(0); transition-delay:1s; }
+  .screen4.active .place{ opacity:1; transition-delay:1.7s; }
+  .screen4.active .divider{ opacity:1; transition-delay:2.1s; }
+  .screen4.active .details{ opacity:1; transition-delay:2.3s; }
+  .screen4.active .countdown{ opacity:1; transition-delay:2.5s; }
+  .screen4.active .cta{ opacity:1; transition-delay:2.7s; }
+  .screen4.active .barcode{ opacity:1; transition-delay:2.9s; }
+  .screen4.active .footer{ opacity:1; transition-delay:3.1s; }
+
+  @keyframes pulseGlow{
+    0%,100%{ opacity:0.9; }
+    50%{ opacity:1; transform: scale(1.04); }
+  }
+  .eclipse-glow{ transform-origin: 400px 330px; animation: pulseGlow 5s ease-in-out infinite; }
+
+  @keyframes twinkle{
+    0%,100%{ opacity:0.2; }
+    50%{ opacity:0.8; }
+  }
+  .star{ animation: twinkle 3.5s ease-in-out infinite; }
+
+  @keyframes orbitSpin{
+    from{ transform: rotate(0deg); }
+    to{ transform: rotate(360deg); }
+  }
+  .orbit-group{ transform-origin: 625px 120px; animation: orbitSpin 40s linear infinite; }
+
+  @keyframes flowDown{
+    0%{ transform: translateY(-40px); opacity:0; }
+    15%{ opacity:0.9; }
+    85%{ opacity:0.9; }
+    100%{ transform: translateY(420px); opacity:0; }
+  }
+  .flow-streak{ animation: flowDown 3s linear infinite; }
+
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
+</style>
+</head>
+<body>
+
+<div class="scene">
+  <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+    <circle class="star" cx="80" cy="60" r="1.2" fill="#f2e8d5" opacity="0.5"/>
+    <circle class="star" cx="150" cy="110" r="1" fill="#f2e8d5" opacity="0.4" style="animation-delay:0.5s"/>
+    <circle class="star" cx="240" cy="50" r="1.4" fill="#f2e8d5" opacity="0.5" style="animation-delay:1s"/>
+    <circle class="star" cx="560" cy="70" r="1" fill="#f2e8d5" opacity="0.5" style="animation-delay:1.5s"/>
+    <circle class="star" cx="700" cy="120" r="1.3" fill="#f2e8d5" opacity="0.4" style="animation-delay:2s"/>
+    <circle class="star" cx="650" cy="180" r="1" fill="#f2e8d5" opacity="0.3" style="animation-delay:0.8s"/>
+    <circle class="star" cx="120" cy="200" r="1" fill="#f2e8d5" opacity="0.3" style="animation-delay:1.2s"/>
+    <circle class="star" cx="330" cy="90" r="1" fill="#f2e8d5" opacity="0.4" style="animation-delay:2.4s"/>
+    <circle class="star" cx="480" cy="40" r="1" fill="#f2e8d5" opacity="0.4" style="animation-delay:1.8s"/>
+    <g class="orbit-group">
+      <path d="M560 150 A 90 90 0 0 1 690 90" fill="none" stroke="#9c8a68" stroke-width="0.5" stroke-dasharray="2 4" opacity="0.5"/>
+      <circle cx="690" cy="90" r="3" fill="#f2e8d5" opacity="0.7"/>
+    </g>
+    <defs>
+      <radialGradient id="eclipse" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#f0d29a" stop-opacity="0.95"/>
+        <stop offset="55%" stop-color="#e0aa5f" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#e0aa5f" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="reflect" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#0a0704" stop-opacity="1"/>
+      </linearGradient>
+      <clipPath id="beamClip"><rect x="392" y="30" width="16" height="440"/></clipPath>
+    </defs>
+    <circle class="eclipse-glow" cx="400" cy="330" r="120" fill="url(#eclipse)"/>
+    <circle cx="400" cy="330" r="58" fill="#0a0704"/>
+    <line x1="400" y1="30" x2="400" y2="470" stroke="#f2e8d5" stroke-width="1" opacity="0.4"/>
+    <g clip-path="url(#beamClip)">
+      <rect class="flow-streak" x="396" y="30" width="8" height="60" fill="#f0d29a" opacity="0.5" style="animation-delay:0s"/>
+      <rect class="flow-streak" x="396" y="30" width="8" height="60" fill="#f0d29a" opacity="0.5" style="animation-delay:1.5s"/>
+    </g>
+    <path d="M300 250 L365 260 L365 480 L300 480 Z" fill="#181209" stroke="#3a2c18" stroke-width="0.5"/>
+    <path d="M500 250 L435 260 L435 480 L500 480 Z" fill="#181209" stroke="#3a2c18" stroke-width="0.5"/>
+    <polygon points="0,480 90,410 170,460 260,400 340,480" fill="#120d07"/>
+    <polygon points="460,480 540,400 620,455 700,405 800,480" fill="#120d07"/>
+    <polygon points="0,500 120,440 220,485 330,435 420,500" fill="#0d0a05"/>
+    <polygon points="380,500 480,435 590,490 680,430 800,500" fill="#0d0a05"/>
+    <rect x="0" y="480" width="800" height="120" fill="#0a0704"/>
+    <g opacity="0.16" transform="translate(0,960) scale(1,-1)">
+      <circle cx="400" cy="330" r="120" fill="url(#eclipse)"/>
+      <path d="M300 250 L365 260 L365 480 L300 480 Z" fill="#181209"/>
+      <path d="M500 250 L435 260 L435 480 L500 480 Z" fill="#181209"/>
+      <line x1="400" y1="60" x2="400" y2="470" stroke="#f2e8d5" stroke-width="1"/>
+    </g>
+    <rect x="0" y="480" width="800" height="120" fill="url(#reflect)"/>
+  </svg>
+</div>
+<div class="vignette"></div>
+
+<div class="wrap">
+  <section class="screen screen1 active" id="screen1">
+    <p class="eyebrow">Signal detected</p>
+    <p class="prompt-name">Diana.</p>
+    <p class="prompt-q">Are you ready for the next experience?</p>
+    <button class="btn" id="nextBtn">Next</button>
+  </section>
+
+  <section class="screen screen2" id="screen2">
+    <p class="eyebrow">Access verification</p>
+    <p class="prompt-name">Enter access coordinates</p>
+    <p class="pw-hint">Find them on your pass — and beside the signal you just scanned.</p>
+    <form class="pw-form" id="pwForm">
+      <input class="pw-input" id="pwInput" type="text" placeholder="00.0000&deg; N, 00.0000&deg; E" autocomplete="off" spellcheck="false">
+      <p class="pw-error" id="pwError">Access denied. Check the coordinates.</p>
+      <button class="btn" type="submit">Unlock</button>
+    </form>
+  </section>
+
+  <section class="screen screen3" id="screen3">
+    <div class="mask-wrap" id="maskWrap">
+      <svg viewBox="0 0 200 200" fill="none">
+        <path d="M100 20 C 145 20 170 55 170 100 C 170 150 140 180 100 180 C 60 180 30 150 30 100 C 30 55 55 20 100 20 Z" stroke="#e0aa5f" stroke-width="1.2"/>
+        <line x1="100" y1="24" x2="100" y2="176" stroke="#e0aa5f" stroke-width="0.6" opacity="0.6"/>
+        <line x1="52" y1="88" x2="86" y2="88" stroke="#f0d29a" stroke-width="3" stroke-linecap="round"/>
+        <line x1="114" y1="88" x2="148" y2="88" stroke="#f0d29a" stroke-width="3" stroke-linecap="round"/>
+        <path d="M70 130 L100 142 L130 130" stroke="#e0aa5f" stroke-width="1" fill="none" opacity="0.7"/>
+        <line x1="30" y1="100" x2="10" y2="100" stroke="#8a5f2e" stroke-width="0.8"/>
+        <line x1="170" y1="100" x2="190" y2="100" stroke="#8a5f2e" stroke-width="0.8"/>
+        <path d="M46 55 L58 46" stroke="#8a5f2e" stroke-width="0.8"/>
+        <path d="M154 55 L142 46" stroke="#8a5f2e" stroke-width="0.8"/>
+      </svg>
     </div>
-    <div class="vignette"></div>
+    <p class="mask-label" id="maskLabel">Access granted</p>
+  </section>
 
-    <div class="wrap">
-        <section class="screen screen1 active" id="screen1">
-              <p class="eyebrow">Signal detected</p>
-              <p class="prompt-name">Diana.</p>
-              <p class="prompt-q">Are you ready for the next experience?</p>
-              <button class="btn" id="nextBtn">Next</button>
-        </section>
+  <section class="screen screen4" id="screen4">
+    <p class="invite-line">You are invited to</p>
+    <p class="presents">Anyma presents</p>
+    <h1 class="wordmark">&AElig;DEN</h1>
+    <p class="place">ATHENS</p>
 
-        <section class="screen screen2" id="screen2">
-              <p class="invite-line">You are invited to</p>
-              <p class="presents">Anyma presents</p>
-              <h1 class="wordmark">ÆDEN</h1>
-              <p class="place">ATHENS</p>
+    <div class="divider"></div>
 
-              <div class="divider"></div>
-
-              <div class="details">
-                      <div class="date">31 October 2026</div>
-                      <div class="meta">Doors open 16:00<br>Olympic Athletic Center of Athens (OAKA), Marousi</div>
-              </div>
-
-              <div class="countdown" id="countdown">
-                      <div class="unit"><span class="unit-num" id="d">-</span><span class="unit-label">days</span></div>
-                      <div class="unit"><span class="unit-num" id="h">-</span><span class="unit-label">hours</span></div>
-                      <div class="unit"><span class="unit-num" id="m">-</span><span class="unit-label">min</span></div>
-                      <div class="unit"><span class="unit-num" id="s">-</span><span class="unit-label">sec</span></div>
-              </div>
-
-              <div class="cta">
-                      <a class="btn" href="event.ics" type="text/calendar">Add to calendar</a>
-              </div>
-
-              <div class="barcode" id="barcode"></div>
-
-              <p class="footer">Somewhere between here and Athens.</p>
-        </section>
+    <div class="details">
+      <div class="date">31 October 2026</div>
+      <div class="meta">Doors open 16:00<br>Olympic Athletic Center of Athens (OAKA), Marousi</div>
     </div>
 
-    <script>
-        document.getElementById('nextBtn').addEventListener('click', function(){
-              document.getElementById('screen1').classList.remove('active');
-              document.getElementById('screen2').classList.add('active');
-        });
+    <div class="countdown" id="countdown">
+      <div class="unit"><span class="unit-num" id="d">-</span><span class="unit-label">days</span></div>
+      <div class="unit"><span class="unit-num" id="h">-</span><span class="unit-label">hours</span></div>
+      <div class="unit"><span class="unit-num" id="m">-</span><span class="unit-label">min</span></div>
+      <div class="unit"><span class="unit-num" id="s">-</span><span class="unit-label">sec</span></div>
+    </div>
 
-        var bc = document.getElementById('barcode');
-        for(var i=0;i<28;i++){
-              var s = document.createElement('span');
-              var h = 6 + Math.random()*14;
-              s.style.height = h+'px';
-              bc.appendChild(s);
-        }
+    <div class="cta">
+      <a class="btn" href="event.ics" type="text/calendar">Add to calendar</a>
+    </div>
 
-        var target = new Date('2026-10-31T16:00:00+02:00').getTime();
-        function tick(){
-              var now = Date.now();
-              var diff = target - now;
-              if(diff < 0) diff = 0;
-              var d = Math.floor(diff / (1000*60*60*24));
-              var h = Math.floor((diff / (1000*60*60)) % 24);
-              var m = Math.floor((diff / (1000*60)) % 60);
-              var s = Math.floor((diff / 1000) % 60);
-              document.getElementById('d').textContent = d;
-              document.getElementById('h').textContent = String(h).padStart(2,'0');
-              document.getElementById('m').textContent = String(m).padStart(2,'0');
-              document.getElementById('s').textContent = String(s).padStart(2,'0');
-        }
-        tick();
-        setInterval(tick, 1000);
-    </script>
+    <div class="barcode" id="barcode"></div>
 
-  </body>
+    <p class="footer">Somewhere between here and Athens.</p>
+  </section>
+</div>
+
+<script>
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+  }
+
+  document.getElementById('nextBtn').addEventListener('click', function(){
+    showScreen('screen2');
+  });
+
+  document.getElementById('pwForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var input = document.getElementById('pwInput');
+    var raw = input.value.toLowerCase().replace(/[^0-9a-z.]/g, '');
+    var ok = raw.indexOf('37.9838') !== -1 && raw.indexOf('23.7275') !== -1;
+    if(ok){
+      showScreen('screen3');
+      setTimeout(function(){
+        document.getElementById('maskWrap').classList.add('show');
+      }, 150);
+      setTimeout(function(){
+        document.getElementById('maskLabel').classList.add('show');
+      }, 900);
+      setTimeout(function(){
+        showScreen('screen4');
+      }, 2800);
+    } else {
+      document.getElementById('pwError').classList.add('show');
+      input.classList.remove('error');
+      void input.offsetWidth;
+      input.classList.add('error');
+    }
+  });
+
+  var bc = document.getElementById('barcode');
+  for(var i=0;i<28;i++){
+    var s = document.createElement('span');
+    var h = 6 + Math.random()*14;
+    s.style.height = h+'px';
+    bc.appendChild(s);
+  }
+
+  var target = new Date('2026-10-31T16:00:00+02:00').getTime();
+  function tick(){
+    var now = Date.now();
+    var diff = target - now;
+    if(diff < 0) diff = 0;
+    var d = Math.floor(diff / (1000*60*60*24));
+    var h = Math.floor((diff / (1000*60*60)) % 24);
+    var m = Math.floor((diff / (1000*60)) % 60);
+    var s = Math.floor((diff / 1000) % 60);
+    document.getElementById('d').textContent = d;
+    document.getElementById('h').textContent = String(h).padStart(2,'0');
+    document.getElementById('m').textContent = String(m).padStart(2,'0');
+    document.getElementById('s').textContent = String(s).padStart(2,'0');
+  }
+  tick();
+  setInterval(tick, 1000);
+</script>
+
+</body>
 </html>

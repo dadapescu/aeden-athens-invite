@@ -63,7 +63,7 @@ animation: scanMove 19s ease-in-out infinite;
   transition:opacity 1.8s ease;
 }
 #lightning-fx.active{
-  opacity:1;
+  opacity:.62;
 }
 .blackout{ position:fixed; inset:0; background:#000; opacity:0; pointer-events:none; z-index:6; transition: opacity 0.6s ease; }
 .blackout.show{ opacity:0.92; }
@@ -548,7 +548,7 @@ transition: border-color 0.5s ease;
     // Soft gold aura
     ctx.shadowColor = `rgba(${GOLD},1)`;
     ctx.shadowBlur = b.glow;
-    ctx.strokeStyle = `rgba(${GOLD},${alpha * 0.32})`;
+    ctx.strokeStyle = `rgba(${GOLD},${alpha * 0.30})`;
     ctx.lineWidth = b.width * 4;
 
     ctx.beginPath();
@@ -562,7 +562,7 @@ transition: border-color 0.5s ease;
 
     // Pale-gold core
     ctx.shadowBlur = 5;
-    ctx.strokeStyle = `rgba(${PALE},${alpha * 0.9})`;
+    ctx.strokeStyle = `rgba(${PALE},${alpha * 0.72})`;
     ctx.lineWidth = b.width;
 
     ctx.beginPath();

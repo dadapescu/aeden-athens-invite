@@ -112,6 +112,11 @@
     font-size:0.8rem; font-weight:400; letter-spacing:0.3em; color:var(--dim); margin:0 0 22px;
   }
 
+  .screen4 .presents, .screen4 .wordmark, .screen4 .place, .screen4 .divider, .screen4 .details, .screen4 .cta, .screen4 .footer{ display:none; }
+  .screen4 .countdown, .screen4 .barcode{ display:none; }
+  .screen4.settled .presents, .screen4.settled .wordmark, .screen4.settled .place, .screen4.settled .divider, .screen4.settled .details, .screen4.settled .cta, .screen4.settled .footer{ display:block; }
+  .screen4.settled .countdown, .screen4.settled .barcode{ display:flex; }
+
   .presents{ font-size:0.8rem; font-weight:300; letter-spacing:0.3em; color:var(--dim); margin:0 0 6px; opacity:0; transition: opacity 1s ease; }
   .wordmark{ font-size:clamp(3rem,15vw,5.2rem); font-weight:700; letter-spacing:-0.01em; line-height:0.95; margin:0; opacity:0; filter:blur(6px); transition: opacity 1.4s cubic-bezier(.16,1,.3,1), filter 1.4s cubic-bezier(.16,1,.3,1); }
   .place{ font-size:clamp(1rem,3vw,1.25rem); font-weight:300; letter-spacing:0.35em; color:var(--dim); margin:10px 0 0; opacity:0; transition: opacity 1s ease; }

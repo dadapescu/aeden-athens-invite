@@ -39,17 +39,17 @@
 
   @keyframes flicker{
     0%,100%{ opacity:0; }
+    1%{ opacity:1; }
+    2%{ opacity:0.3; }
     3%{ opacity:0.9; }
-    5%{ opacity:0.1; }
-    7%{ opacity:0.8; }
-    9%{ opacity:0; }
-    55%{ opacity:0; }
-    57%{ opacity:0.7; }
-    59%{ opacity:0.15; }
-    61%{ opacity:0.85; }
-    63%{ opacity:0; }
+    4%{ opacity:0; }
+    50%{ opacity:0; }
+    51%{ opacity:0.8; }
+    52%{ opacity:0.1; }
+    53%{ opacity:1; }
+    54%{ opacity:0; }
   }
-  .spark{ position:fixed; z-index:3; pointer-events:none; opacity:0; animation: flicker 6s ease-in-out infinite; }
+  .bolt{ position:fixed; z-index:3; pointer-events:none; opacity:0; animation: flicker 7s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(224,170,95,0.9)) drop-shadow(0 0 18px rgba(224,170,95,0.5)); }
 
   .hud{ position:fixed; width:22px; height:22px; z-index:4; pointer-events:none; border-color: rgba(224,170,95,0.5); }
   .hud-tl{ top:18px; left:18px; border-top:1px solid; border-left:1px solid; }
@@ -106,25 +106,32 @@
     40%,60%{ transform:translateX(8px); }
   }
 
-  .invite-line{
-    font-size: 2.1rem; font-weight: 500; letter-spacing: 0.04em;
-    color: var(--paper); margin: 0;
-    opacity:0;
-    transition: opacity 1.2s ease, font-size 1.3s cubic-bezier(.65,0,.35,1), letter-spacing 1.3s cubic-bezier(.65,0,.35,1), color 1.3s ease, margin 1.3s ease;
-  }
-  .screen4.active .invite-line{ opacity:1; }
-  .screen4.settled .invite-line{
-    font-size:0.8rem; font-weight:400; letter-spacing:0.3em; color:var(--dim); margin:0 0 22px;
-  }
+  .zoom-stage{ position:relative; width:100%; min-height:min(46vh, 340px); display:flex; align-items:center; justify-content:center; }
+  .zoom-stage > *{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
 
-  .screen4 .presents, .screen4 .wordmark, .screen4 .place, .screen4 .divider, .screen4 .details, .screen4 .cta, .screen4 .footer{ display:none; }
+  .invite-line{
+    font-size: clamp(2.1rem, 11vw, 4.6rem); font-weight: 700; letter-spacing: 0.01em;
+    color: var(--paper); margin: 0;
+    opacity:1; transform:scale(1);
+    transition: opacity 0.9s ease, transform 1s cubic-bezier(.4,0,.2,1);
+  }
+  .screen4.settled .invite-line{ opacity:0; transform:scale(2.3); }
+
+  .reveal-group{
+    opacity:0; transform:scale(0.55);
+    transition: opacity 1s ease, transform 1.1s cubic-bezier(.2,.6,.3,1);
+    transition-delay: 0.15s;
+  }
+  .screen4.settled .reveal-group{ opacity:1; transform:scale(1); }
+
+  .screen4 .divider, .screen4 .details, .screen4 .cta, .screen4 .footer{ display:none; }
   .screen4 .countdown, .screen4 .barcode{ display:none; }
-  .screen4.settled .presents, .screen4.settled .wordmark, .screen4.settled .place, .screen4.settled .divider, .screen4.settled .details, .screen4.settled .cta, .screen4.settled .footer{ display:block; }
+  .screen4.settled .divider, .screen4.settled .details, .screen4.settled .cta, .screen4.settled .footer{ display:block; }
   .screen4.settled .countdown, .screen4.settled .barcode{ display:flex; }
 
-  .presents{ font-size:0.8rem; font-weight:300; letter-spacing:0.3em; color:var(--dim); margin:0 0 6px; opacity:0; transition: opacity 1s ease; }
-  .wordmark{ font-size:clamp(3rem,15vw,5.2rem); font-weight:700; letter-spacing:-0.01em; line-height:0.95; margin:0; opacity:0; filter:blur(6px); transition: opacity 1.4s cubic-bezier(.16,1,.3,1), filter 1.4s cubic-bezier(.16,1,.3,1); }
-  .place{ font-size:clamp(1rem,3vw,1.25rem); font-weight:300; letter-spacing:0.35em; color:var(--dim); margin:10px 0 0; opacity:0; transition: opacity 1s ease; }
+  .presents{ font-size:0.8rem; font-weight:300; letter-spacing:0.3em; color:var(--dim); margin:0 0 6px; }
+  .wordmark{ font-size:clamp(3rem,15vw,5.2rem); font-weight:700; letter-spacing:-0.01em; line-height:0.95; margin:0; }
+  .place{ font-size:clamp(1rem,3vw,1.25rem); font-weight:300; letter-spacing:0.35em; color:var(--dim); margin:10px 0 0; }
 
   .divider{ width:1px; height:56px; background: linear-gradient(to bottom, transparent, var(--line)); margin:42px 0; opacity:0; transition: opacity 1s ease; }
 
@@ -145,15 +152,12 @@
 
   .footer{ margin-top:22px; font-size:0.78rem; font-weight:300; color: rgba(156,138,104,0.65); letter-spacing:0.03em; opacity:0; transition: opacity 1s ease; }
 
-  .screen4.settled .presents{ opacity:1; transition-delay:0.9s; }
-  .screen4.settled .wordmark{ opacity:1; filter:blur(0); transition-delay:1s; }
-  .screen4.settled .place{ opacity:1; transition-delay:1.7s; }
-  .screen4.settled .divider{ opacity:1; transition-delay:2.1s; }
-  .screen4.settled .details{ opacity:1; transition-delay:2.3s; }
-  .screen4.settled .countdown{ opacity:1; transition-delay:2.5s; }
-  .screen4.settled .cta{ opacity:1; transition-delay:2.7s; }
-  .screen4.settled .barcode{ opacity:1; transition-delay:2.9s; }
-  .screen4.settled .footer{ opacity:1; transition-delay:3.1s; }
+  .screen4.settled .divider{ opacity:1; transition-delay:1.3s; }
+  .screen4.settled .details{ opacity:1; transition-delay:1.5s; }
+  .screen4.settled .countdown{ opacity:1; transition-delay:1.7s; }
+  .screen4.settled .cta{ opacity:1; transition-delay:1.9s; }
+  .screen4.settled .barcode{ opacity:1; transition-delay:2.1s; }
+  .screen4.settled .footer{ opacity:1; transition-delay:2.3s; }
 
   @keyframes pulseGlow{
     0%,100%{ opacity:0.85; }
@@ -230,10 +234,10 @@
 <div class="hud hud-tr"></div>
 <div class="hud hud-bl"></div>
 <div class="hud hud-br"></div>
-<svg class="spark" style="left:13%; top:20%; width:24px; height:38px; animation-delay:0.3s" viewBox="0 0 14 30"><path d="M8 0 L1 16 L6 16 L2 30 L13 12 L7 12 Z" fill="#e0aa5f"/></svg>
-<svg class="spark" style="right:15%; top:14%; width:18px; height:30px; animation-delay:2.1s" viewBox="0 0 14 30"><path d="M8 0 L1 16 L6 16 L2 30 L13 12 L7 12 Z" fill="#e0aa5f"/></svg>
-<svg class="spark" style="left:20%; bottom:16%; width:16px; height:26px; animation-delay:3.6s" viewBox="0 0 14 30"><path d="M8 0 L1 16 L6 16 L2 30 L13 12 L7 12 Z" fill="#e0aa5f"/></svg>
-<svg class="spark" style="right:22%; bottom:22%; width:20px; height:32px; animation-delay:1.2s" viewBox="0 0 14 30"><path d="M8 0 L1 16 L6 16 L2 30 L13 12 L7 12 Z" fill="#e0aa5f"/></svg>
+<svg class="bolt" style="left:8%; top:14%; width:70px; height:120px; animation-delay:0.4s" viewBox="0 0 60 100"><path d="M30 0 L18 40 L26 40 L10 100 L38 45 L28 45 L42 0 Z" fill="#f7f0e0"/><path d="M26 40 L50 30" stroke="#f7f0e0" stroke-width="1.4" fill="none"/><path d="M28 45 L4 60" stroke="#f7f0e0" stroke-width="1.4" fill="none"/></svg>
+<svg class="bolt" style="right:10%; top:8%; width:55px; height:95px; animation-delay:2.6s" viewBox="0 0 60 100"><path d="M30 0 L18 40 L26 40 L10 100 L38 45 L28 45 L42 0 Z" fill="#f7f0e0"/><path d="M26 40 L50 30" stroke="#f7f0e0" stroke-width="1.4" fill="none"/><path d="M28 45 L4 60" stroke="#f7f0e0" stroke-width="1.4" fill="none"/></svg>
+<svg class="bolt" style="left:14%; bottom:10%; width:48px; height:82px; animation-delay:4.1s" viewBox="0 0 60 100"><path d="M30 0 L18 40 L26 40 L10 100 L38 45 L28 45 L42 0 Z" fill="#f7f0e0"/><path d="M26 40 L50 30" stroke="#f7f0e0" stroke-width="1.4" fill="none"/><path d="M28 45 L4 60" stroke="#f7f0e0" stroke-width="1.4" fill="none"/></svg>
+<svg class="bolt" style="right:12%; bottom:14%; width:60px; height:104px; animation-delay:1.5s" viewBox="0 0 60 100"><path d="M30 0 L18 40 L26 40 L10 100 L38 45 L28 45 L42 0 Z" fill="#f7f0e0"/><path d="M26 40 L50 30" stroke="#f7f0e0" stroke-width="1.4" fill="none"/><path d="M28 45 L4 60" stroke="#f7f0e0" stroke-width="1.4" fill="none"/></svg>
 
 <div class="wrap">
   <section class="screen screen1 active" id="screen1">
@@ -257,10 +261,14 @@
   </section>
 
   <section class="screen screen4" id="screen4">
-    <p class="invite-line">YOU ARE INVITED TO</p>
-    <p class="presents">Anyma presents</p>
-    <h1 class="wordmark">&AElig;DEN</h1>
-    <p class="place">ATHENS</p>
+    <div class="zoom-stage">
+      <p class="invite-line">YOU ARE INVITED TO</p>
+      <div class="reveal-group">
+        <p class="presents">Anyma presents</p>
+        <h1 class="wordmark">&AElig;DEN</h1>
+        <p class="place">ATHENS</p>
+      </div>
+    </div>
 
     <div class="divider"></div>
 
@@ -310,7 +318,7 @@
       }, 1300);
       setTimeout(function(){
         document.getElementById('screen4').classList.add('settled');
-      }, 3100);
+      }, 3000);
     } else {
       document.getElementById('pwError').classList.add('show');
       [nInput, eInput].forEach(function(inp){

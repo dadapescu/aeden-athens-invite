@@ -10,11 +10,13 @@
 <style>
   :root{
     --void: #0a0704;
-    --paper: #f2e8d5;
+    --void-deep: #030201;
+    --paper: #f2ead8;
     --dim: #9c8a68;
-    --amber: #e0aa5f;
-    --amber-dim: #8a5f2e;
-    --line: rgba(242,232,213,0.15);
+    --gold: #c9973f;
+    --gold-bright: #e8c078;
+    --gold-dim: #5c431f;
+    --line: rgba(242,234,216,0.12);
   }
   *{ box-sizing: border-box; }
   html,body{
@@ -28,223 +30,214 @@
 
   .scene{ position:fixed; inset:0; z-index:0; pointer-events:none; }
   .scene svg{ width:100%; height:100%; }
+
+  .grain{
+    position:fixed; inset:0; z-index:1; pointer-events:none; opacity:0.035; mix-blend-mode:overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
   .vignette{
     position:fixed; inset:0; z-index:1; pointer-events:none;
-    background: radial-gradient(ellipse at 50% 35%, transparent 35%, var(--void) 92%);
+    background: radial-gradient(ellipse at 50% 40%, transparent 28%, var(--void) 94%);
   }
   .text-shield{
     position:fixed; inset:0; z-index:1; pointer-events:none;
-    background: radial-gradient(circle at 50% 55%, rgba(10,7,4,0.62) 0%, rgba(10,7,4,0.22) 42%, transparent 68%);
+    background: radial-gradient(circle at 50% 52%, rgba(5,3,1,0.55) 0%, rgba(5,3,1,0.18) 42%, transparent 68%);
+  }
+  .scan{
+    position:fixed; left:0; right:0; height:140px; top:-140px; z-index:2; pointer-events:none;
+    background: linear-gradient(to bottom, transparent, rgba(201,151,63,0.05), transparent);
+    animation: scanMove 19s ease-in-out infinite;
+  }
+  @keyframes scanMove{
+    0%{ transform: translateY(0); }
+    55%{ transform: translateY(calc(100vh + 140px)); }
+    100%{ transform: translateY(calc(100vh + 140px)); }
   }
 
-  @keyframes flicker{
-    0%,100%{ opacity:0; }
-    1%{ opacity:1; }
-    2%{ opacity:0.3; }
-    3%{ opacity:0.9; }
-    4%{ opacity:0; }
-    50%{ opacity:0; }
-    51%{ opacity:0.8; }
-    52%{ opacity:0.1; }
-    53%{ opacity:1; }
-    54%{ opacity:0; }
-  }
-  .bolt{ position:fixed; z-index:3; pointer-events:none; opacity:0; animation: flicker 7s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(224,170,95,0.9)) drop-shadow(0 0 18px rgba(224,170,95,0.5)); }
+  .blackout{ position:fixed; inset:0; background:#000; opacity:0; pointer-events:none; z-index:6; transition: opacity 0.6s ease; }
+  .blackout.show{ opacity:0.92; }
 
-  .hud{ position:fixed; width:22px; height:22px; z-index:4; pointer-events:none; border-color: rgba(224,170,95,0.5); }
-  .hud-tl{ top:18px; left:18px; border-top:1px solid; border-left:1px solid; }
-  .hud-tr{ top:18px; right:18px; border-top:1px solid; border-right:1px solid; }
-  .hud-bl{ bottom:18px; left:18px; border-bottom:1px solid; border-left:1px solid; }
-  .hud-br{ bottom:18px; right:18px; border-bottom:1px solid; border-right:1px solid; }
-
-  .wrap{ position:relative; z-index:2; min-height:100vh; }
+  .wrap{ position:relative; z-index:3; min-height:100vh; }
   .screen{
     position:absolute; inset:0;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center; padding: 32px 28px;
     opacity:0; pointer-events:none;
-    transition: opacity 0.8s ease;
+    transition: opacity 1.1s ease;
   }
   .screen.active{ opacity:1; pointer-events:auto; }
 
-  .eyebrow{ font-size:0.75rem; font-weight:400; letter-spacing:0.35em; color:var(--dim); margin:0 0 28px; }
-  .prompt-name{ font-size:1.4rem; font-weight:500; margin:0 0 14px; letter-spacing:0.02em; }
-  .prompt-q{ font-size:1rem; font-weight:300; letter-spacing:0.08em; max-width:30ch; line-height:1.6; margin:0 0 48px; }
+  .eyebrow{ font-size:0.65rem; font-weight:400; letter-spacing:0.5em; color:var(--dim); margin:0 0 44px; }
 
-  .btn{
-    display:inline-flex; align-items:center; gap:10px;
-    padding:15px 40px;
-    border:1px solid rgba(224,170,95,0.4);
-    color:var(--paper); background:transparent;
-    text-decoration:none;
-    font-family:inherit; font-size:0.9rem; letter-spacing:0.12em;
-    cursor:pointer;
-    transition: background 0.3s ease, border-color 0.3s ease;
+  .prompt-name{ font-size:clamp(1.7rem,6vw,2.8rem); font-weight:300; letter-spacing:0.06em; margin:0 0 6px; line-height:1.35; }
+  .prompt-name b{ display:block; font-weight:500; }
+  .prompt-q{ font-size:0.8rem; font-weight:300; letter-spacing:0.28em; color:var(--dim); margin:38px 0 66px; }
+
+  .enter-link{
+    position:relative; display:inline-block; background:none; border:none;
+    color:var(--paper); font-family:inherit; font-size:0.82rem; letter-spacing:0.4em;
+    padding:12px 6px; cursor:pointer; text-decoration:none;
   }
-  .btn:hover{ border-color:var(--amber); background: rgba(224,170,95,0.1); }
+  .enter-link::after{
+    content:''; position:absolute; left:0; right:0; bottom:4px; height:1px; background:var(--gold-dim);
+    animation: pulseLine 4.5s ease-in-out infinite;
+  }
+  @keyframes pulseLine{
+    0%,100%{ opacity:0.3; box-shadow:none; }
+    50%{ opacity:1; box-shadow:0 0 8px rgba(201,151,63,0.55); }
+  }
 
-  .pw-form{ display:flex; flex-direction:column; align-items:center; gap:18px; margin-top:36px; }
-  .coord-row{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; }
+  .pw-form{ display:flex; flex-direction:column; align-items:center; gap:34px; margin-top:16px; }
+  .coord-row{ display:flex; gap:40px; flex-wrap:wrap; justify-content:center; }
+  .coord-field{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .coord-label{ font-size:0.58rem; letter-spacing:0.35em; color:var(--dim); }
   .pw-input{
-    padding:14px 16px;
-    background: rgba(242,232,213,0.04);
-    border:1px solid rgba(242,232,213,0.25);
-    color: var(--paper);
-    font-family:inherit; font-size:0.95rem; letter-spacing:0.03em;
-    text-align:center;
-    outline:none;
+    background:transparent; border:none; border-bottom:1px solid rgba(242,234,216,0.22);
+    color:var(--paper); font-family:inherit; font-size:1rem; letter-spacing:0.1em;
+    text-align:center; outline:none; padding:6px 4px; width:150px;
+    transition: border-color 0.5s ease;
   }
-  .coord-input{ width: min(150px, 40vw); }
-  .pw-input:focus{ border-color: var(--amber); }
-  .pw-input.error{ animation: shake 0.5s; border-color: var(--amber); }
-  .pw-error{ font-size:0.8rem; color:var(--amber); opacity:0; height:14px; margin:0; letter-spacing:0.05em; }
+  .pw-input::placeholder{ color:rgba(156,138,104,0.55); }
+  .pw-input:focus{ border-color:var(--gold); }
+  .pw-input.error{ border-color:var(--gold-bright); }
+  .pw-error{ font-size:0.7rem; color:var(--gold-bright); opacity:0; letter-spacing:0.18em; line-height:1.9; transition: opacity 0.9s ease; }
   .pw-error.show{ opacity:1; }
-  @keyframes shake{
-    10%,90%{ transform:translateX(-2px); }
-    20%,80%{ transform:translateX(4px); }
-    30%,50%,70%{ transform:translateX(-8px); }
-    40%,60%{ transform:translateX(8px); }
-  }
 
-  .zoom-stage{ position:relative; width:100%; min-height:min(46vh, 340px); display:flex; align-items:center; justify-content:center; }
+  .ag-line{ opacity:0; transform:translateY(14px); transition: opacity 1.7s ease, transform 1.7s ease; }
+  .ag-granted{ font-size:0.78rem; letter-spacing:0.55em; color:var(--gold); margin:0; }
+  .ag-name{ font-size:clamp(2rem,7vw,3.2rem); font-weight:300; letter-spacing:0.22em; color:var(--paper); margin:36px 0 0; }
+  .ag-journey{ font-size:0.82rem; letter-spacing:0.26em; color:var(--dim); margin:24px 0 0; }
+  .screen3.active .ag-granted{ opacity:1; transform:translateY(0); transition-delay:0.3s; }
+  .screen3.active .ag-name{ opacity:1; transform:translateY(0); transition-delay:1.6s; }
+  .screen3.active .ag-journey{ opacity:1; transform:translateY(0); transition-delay:2.9s; }
+
+  .zoom-stage{ position:relative; width:100%; min-height:min(50vh,380px); display:flex; align-items:center; justify-content:center; }
   .zoom-stage > *{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
 
   .invite-line{
-    font-size: clamp(2.1rem, 11vw, 4.6rem); font-weight: 700; letter-spacing: 0.01em;
-    color: var(--paper); margin: 0;
-    opacity:1; transform:scale(1);
-    transition: opacity 0.9s ease, transform 1s cubic-bezier(.4,0,.2,1);
+    font-size: clamp(1.5rem,6vw,2.4rem); font-weight:300; letter-spacing:0.35em;
+    color:var(--paper); margin:0;
+    opacity:0; transform:scale(1.12); filter:blur(0);
+    transition: opacity 1.5s ease, transform 1.9s cubic-bezier(.22,.61,.36,1), filter 1.5s ease;
   }
-  .screen4.settled .invite-line{ opacity:0; transform:scale(2.3); }
+  .screen4.active .invite-line{ opacity:1; transform:scale(1); }
+  .screen4.settled .invite-line{ opacity:0; transform:scale(0.86); filter:blur(6px); }
 
   .reveal-group{
-    opacity:0; transform:scale(0.55);
-    transition: opacity 1s ease, transform 1.1s cubic-bezier(.2,.6,.3,1);
-    transition-delay: 0.15s;
+    opacity:0; transform:scale(0.94); filter:blur(4px);
+    transition: opacity 1.9s ease, transform 2.1s cubic-bezier(.22,.61,.36,1), filter 1.9s ease;
+    transition-delay:0.4s;
   }
-  .screen4.settled .reveal-group{ opacity:1; transform:scale(1); }
+  .screen4.settled .reveal-group{ opacity:1; transform:scale(1); filter:blur(0); }
 
-  .screen4 .divider, .screen4 .details, .screen4 .cta, .screen4 .footer{ display:none; }
-  .screen4 .countdown, .screen4 .barcode{ display:none; }
-  .screen4.settled .divider, .screen4.settled .details, .screen4.settled .cta, .screen4.settled .footer{ display:block; }
-  .screen4.settled .countdown, .screen4.settled .barcode{ display:flex; }
+  .presents{ font-size:0.7rem; font-weight:400; letter-spacing:0.55em; color:var(--dim); margin:0 0 20px; }
+  .wordmark{
+    font-size:clamp(3rem,15vw,5.8rem); font-weight:500; letter-spacing:0.01em; line-height:0.95; margin:0;
+    color:var(--paper); text-shadow:0 0 44px rgba(201,151,63,0.28);
+  }
+  .place{ font-size:0.82rem; font-weight:400; letter-spacing:0.55em; color:var(--gold); margin:24px 0 0; }
+  .date-line{ font-size:0.76rem; font-weight:300; letter-spacing:0.3em; color:var(--dim); margin:10px 0 0; }
+  .meta-line{ font-size:0.74rem; font-weight:300; color:var(--dim); opacity:0.85; margin:22px 0 0; letter-spacing:0.04em; }
 
-  .presents{ font-size:0.8rem; font-weight:300; letter-spacing:0.3em; color:var(--dim); margin:0 0 6px; }
-  .wordmark{ font-size:clamp(3rem,15vw,5.2rem); font-weight:700; letter-spacing:-0.01em; line-height:0.95; margin:0; }
-  .place{ font-size:clamp(1rem,3vw,1.25rem); font-weight:300; letter-spacing:0.35em; color:var(--dim); margin:10px 0 0; }
+  .countdown-block{ opacity:0; transition: opacity 1.5s ease; margin-top:54px; transition-delay:2.5s; }
+  .screen4.settled .countdown-block{ opacity:1; }
+  .countdown-row{ font-size:1.5rem; font-weight:300; letter-spacing:0.14em; font-variant-numeric:tabular-nums; color:var(--paper); }
+  .countdown-caption{ font-size:0.6rem; letter-spacing:0.42em; color:var(--dim); margin-top:9px; }
 
-  .divider{ width:1px; height:56px; background: linear-gradient(to bottom, transparent, var(--line)); margin:42px 0; opacity:0; transition: opacity 1s ease; }
+  .cta-block{ opacity:0; transition: opacity 1.5s ease; margin-top:46px; transition-delay:2.9s; }
+  .screen4.settled .cta-block{ opacity:1; }
 
-  .details{ opacity:0; transition: opacity 1s ease; }
-  .date{ font-size:1.3rem; font-weight:500; letter-spacing:0.04em; }
-  .meta{ margin-top:10px; font-size:0.9rem; font-weight:300; color:var(--dim); line-height:1.7; }
+  .footer{ opacity:0; transition: opacity 1.5s ease; margin-top:42px; font-size:0.68rem; letter-spacing:0.14em; color:rgba(156,138,104,0.5); transition-delay:3.3s; }
+  .screen4.settled .footer{ opacity:1; }
 
-  .countdown{ display:flex; gap:20px; margin:40px 0 0; opacity:0; transition: opacity 1s ease; }
-  .unit{ display:flex; flex-direction:column; align-items:center; min-width:52px; position:relative; }
-  .unit:not(:last-child)::after{ content:''; position:absolute; right:-10px; top:6px; width:1px; height:24px; background:var(--line); }
-  .unit-num{ font-size:1.7rem; font-weight:500; font-variant-numeric:tabular-nums; }
-  .unit-label{ font-size:0.62rem; font-weight:300; letter-spacing:0.16em; color:var(--dim); margin-top:5px; }
+  @keyframes breathe{
+    0%,100%{ opacity:0.55; transform:scale(1); }
+    50%{ opacity:0.85; transform:scale(1.05); }
+  }
+  .humanoid{ opacity:0.14; transition: opacity 2.6s ease; }
+  .humanoid.intense{ opacity:0.68; }
+  .humanoid.settled{ opacity:0.26; }
+  .humanoid-core{ animation: breathe 8s ease-in-out infinite; mix-blend-mode:screen; }
 
-  .cta{ margin-top:50px; opacity:0; transition: opacity 1s ease; }
-
-  .barcode{ display:flex; gap:2px; align-items:flex-end; height:20px; margin-top:28px; opacity:0; transition: opacity 1s ease; }
-  .barcode span{ width:2px; background: rgba(224,170,95,0.35); }
-
-  .footer{ margin-top:22px; font-size:0.78rem; font-weight:300; color: rgba(156,138,104,0.65); letter-spacing:0.03em; opacity:0; transition: opacity 1s ease; }
-
-  .screen4.settled .divider{ opacity:1; transition-delay:1.3s; }
-  .screen4.settled .details{ opacity:1; transition-delay:1.5s; }
-  .screen4.settled .countdown{ opacity:1; transition-delay:1.7s; }
-  .screen4.settled .cta{ opacity:1; transition-delay:1.9s; }
-  .screen4.settled .barcode{ opacity:1; transition-delay:2.1s; }
-  .screen4.settled .footer{ opacity:1; transition-delay:2.3s; }
+  @keyframes driftUp{
+    0%{ transform:translateY(0); opacity:0; }
+    15%{ opacity:0.6; }
+    85%{ opacity:0.15; }
+    100%{ transform:translateY(-70px); opacity:0; }
+  }
+  .particle{ animation: driftUp 10s ease-in-out infinite; }
 
   @keyframes pulseGlow{
-    0%,100%{ opacity:0.85; }
-    50%{ opacity:1; transform: scale(1.04); }
+    0%,100%{ opacity:0.55; }
+    50%{ opacity:0.85; transform:scale(1.04); }
   }
-  .eclipse-glow{ transform-origin: 400px 330px; animation: pulseGlow 5s ease-in-out infinite; }
+  .breath-glow{ transform-origin:400px 300px; animation: pulseGlow 7s ease-in-out infinite; }
 
   @keyframes twinkle{
-    0%,100%{ opacity:0.2; }
-    50%{ opacity:0.8; }
+    0%,100%{ opacity:0.15; }
+    50%{ opacity:0.55; }
   }
-  .star{ animation: twinkle 3.5s ease-in-out infinite; }
-
-  @keyframes orbitSpin{
-    from{ transform: rotate(0deg); }
-    to{ transform: rotate(360deg); }
-  }
-  .orbit-group{ transform-origin: 625px 120px; animation: orbitSpin 40s linear infinite; }
-
-  .door{ transition: transform 1.4s cubic-bezier(.65,0,.35,1); }
-  .door-left{ transform: translateX(0); }
-  .door-right{ transform: translateX(0); }
-  .scene.open .door-left{ transform: translateX(-160px); }
-  .scene.open .door-right{ transform: translateX(160px); }
+  .star{ animation: twinkle 5s ease-in-out infinite; }
 
   @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
 </style>
 </head>
 <body>
 
-<div class="scene" id="scene">
+<div class="scene">
   <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
-    <circle class="star" cx="80" cy="60" r="1.2" fill="#f2e8d5" opacity="0.5"/>
-    <circle class="star" cx="150" cy="110" r="1" fill="#f2e8d5" opacity="0.4" style="animation-delay:0.5s"/>
-    <circle class="star" cx="240" cy="50" r="1.4" fill="#f2e8d5" opacity="0.5" style="animation-delay:1s"/>
-    <circle class="star" cx="560" cy="70" r="1" fill="#f2e8d5" opacity="0.5" style="animation-delay:1.5s"/>
-    <circle class="star" cx="700" cy="120" r="1.3" fill="#f2e8d5" opacity="0.4" style="animation-delay:2s"/>
-    <circle class="star" cx="650" cy="180" r="1" fill="#f2e8d5" opacity="0.3" style="animation-delay:0.8s"/>
-    <circle class="star" cx="120" cy="200" r="1" fill="#f2e8d5" opacity="0.3" style="animation-delay:1.2s"/>
-    <circle class="star" cx="330" cy="90" r="1" fill="#f2e8d5" opacity="0.4" style="animation-delay:2.4s"/>
-    <circle class="star" cx="480" cy="40" r="1" fill="#f2e8d5" opacity="0.4" style="animation-delay:1.8s"/>
-    <g class="orbit-group">
-      <path d="M560 150 A 90 90 0 0 1 690 90" fill="none" stroke="#9c8a68" stroke-width="0.5" stroke-dasharray="2 4" opacity="0.5"/>
-      <circle cx="690" cy="90" r="3" fill="#f2e8d5" opacity="0.7"/>
-    </g>
+    <circle class="star" cx="90" cy="70" r="1.1" fill="#f2ead8" opacity="0.4"/>
+    <circle class="star" cx="180" cy="130" r="1" fill="#f2ead8" opacity="0.3" style="animation-delay:0.6s"/>
+    <circle class="star" cx="640" cy="90" r="1.2" fill="#f2ead8" opacity="0.35" style="animation-delay:1.4s"/>
+    <circle class="star" cx="710" cy="160" r="1" fill="#f2ead8" opacity="0.3" style="animation-delay:2.1s"/>
+    <circle class="star" cx="120" cy="240" r="1" fill="#f2ead8" opacity="0.25" style="animation-delay:1.8s"/>
+    <circle class="star" cx="690" cy="260" r="1" fill="#f2ead8" opacity="0.3" style="animation-delay:0.9s"/>
+
     <defs>
-      <radialGradient id="eclipse" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#f0d29a" stop-opacity="0.7"/>
-        <stop offset="55%" stop-color="#e0aa5f" stop-opacity="0.22"/>
-        <stop offset="100%" stop-color="#e0aa5f" stop-opacity="0"/>
+      <radialGradient id="breathGrad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#c9973f" stop-opacity="0.22"/>
+        <stop offset="60%" stop-color="#c9973f" stop-opacity="0.06"/>
+        <stop offset="100%" stop-color="#c9973f" stop-opacity="0"/>
       </radialGradient>
-      <linearGradient id="reflect" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#000000" stop-opacity="0"/>
-        <stop offset="100%" stop-color="#0a0704" stop-opacity="1"/>
+      <linearGradient id="bodyFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1c130a"/>
+        <stop offset="100%" stop-color="#080502"/>
       </linearGradient>
+      <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#e8c078" stop-opacity="0.9"/>
+        <stop offset="55%" stop-color="#c9973f" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#c9973f" stop-opacity="0"/>
+      </radialGradient>
     </defs>
-    <circle class="eclipse-glow" cx="400" cy="330" r="120" fill="url(#eclipse)"/>
-    <path class="door door-left" d="M250 190 L400 190 L400 480 L250 480 Z" fill="#161009" stroke="#3a2c18" stroke-width="0.6"/>
-    <path class="door door-right" d="M550 190 L400 190 L400 480 L550 480 Z" fill="#161009" stroke="#3a2c18" stroke-width="0.6"/>
-    <polygon points="0,480 90,410 170,460 260,400 340,480" fill="#120d07"/>
-    <polygon points="460,480 540,400 620,455 700,405 800,480" fill="#120d07"/>
-    <polygon points="0,500 120,440 220,485 330,435 420,500" fill="#0d0a05"/>
-    <polygon points="380,500 480,435 590,490 680,430 800,500" fill="#0d0a05"/>
-    <rect x="0" y="480" width="800" height="120" fill="#0a0704"/>
-    <g opacity="0.16" transform="translate(0,960) scale(1,-1)">
-      <circle cx="400" cy="330" r="120" fill="url(#eclipse)"/>
+
+    <circle class="breath-glow" cx="400" cy="300" r="180" fill="url(#breathGrad)"/>
+
+    <g id="humanoid" class="humanoid">
+      <ellipse cx="400" cy="178" rx="20" ry="24" fill="url(#bodyFill)" stroke="#5c431f" stroke-width="0.5" stroke-opacity="0.45"/>
+      <path d="M382,205 C375,230 372,260 374,290 L368,340 C364,380 362,420 366,460 C368,468 374,472 382,472 L396,472 L398,350 L402,350 L404,472 L418,472 C426,472 432,468 434,460 C438,420 436,380 432,340 L426,290 C428,260 425,230 418,205 Z" fill="url(#bodyFill)" stroke="#5c431f" stroke-width="0.5" stroke-opacity="0.45"/>
+      <path d="M378,215 C355,225 335,250 322,285 C318,296 320,304 328,306 C338,304 348,290 358,270 C366,255 372,235 376,222 Z" fill="url(#bodyFill)" stroke="#5c431f" stroke-width="0.5" stroke-opacity="0.4"/>
+      <path d="M422,215 C445,225 465,250 478,285 C482,296 480,304 472,306 C462,304 452,290 442,270 C434,255 428,235 424,222 Z" fill="url(#bodyFill)" stroke="#5c431f" stroke-width="0.5" stroke-opacity="0.4"/>
+      <ellipse class="humanoid-core" cx="400" cy="290" rx="16" ry="70" fill="url(#coreGlow)"/>
+      <circle class="particle" cx="328" cy="300" r="1.3" fill="#e8c078" style="animation-delay:0.5s"/>
+      <circle class="particle" cx="472" cy="300" r="1.3" fill="#e8c078" style="animation-delay:2.2s"/>
+      <circle class="particle" cx="400" cy="155" r="1.2" fill="#e8c078" style="animation-delay:3.6s"/>
+      <circle class="particle" cx="388" cy="468" r="1.1" fill="#e8c078" style="animation-delay:1.4s"/>
+      <circle class="particle" cx="412" cy="468" r="1.1" fill="#e8c078" style="animation-delay:4.4s"/>
     </g>
-    <rect x="0" y="480" width="800" height="120" fill="url(#reflect)"/>
   </svg>
 </div>
+<div class="grain"></div>
 <div class="vignette"></div>
 <div class="text-shield"></div>
-<div class="hud hud-tl"></div>
-<div class="hud hud-tr"></div>
-<div class="hud hud-bl"></div>
-<div class="hud hud-br"></div>
-<svg class="bolt" style="left:8%; top:14%; width:70px; height:120px; animation-delay:0.4s" viewBox="0 0 60 100"><path d="M30 0 L18 40 L26 40 L10 100 L38 45 L28 45 L42 0 Z" fill="#f7f0e0"/><path d="M26 40 L50 30" stroke="#f7f0e0" stroke-width="1.4" fill="none"/><path d="M28 45 L4 60" stroke="#f7f0e0" stroke-width="1.4" fill="none"/></svg>
-<svg class="bolt" style="right:10%; top:8%; width:55px; height:95px; animation-delay:2.6s" viewBox="0 0 60 100"><path d="M30 0 L18 40 L26 40 L10 100 L38 45 L28 45 L42 0 Z" fill="#f7f0e0"/><path d="M26 40 L50 30" stroke="#f7f0e0" stroke-width="1.4" fill="none"/><path d="M28 45 L4 60" stroke="#f7f0e0" stroke-width="1.4" fill="none"/></svg>
-<svg class="bolt" style="left:14%; bottom:10%; width:48px; height:82px; animation-delay:4.1s" viewBox="0 0 60 100"><path d="M30 0 L18 40 L26 40 L10 100 L38 45 L28 45 L42 0 Z" fill="#f7f0e0"/><path d="M26 40 L50 30" stroke="#f7f0e0" stroke-width="1.4" fill="none"/><path d="M28 45 L4 60" stroke="#f7f0e0" stroke-width="1.4" fill="none"/></svg>
-<svg class="bolt" style="right:12%; bottom:14%; width:60px; height:104px; animation-delay:1.5s" viewBox="0 0 60 100"><path d="M30 0 L18 40 L26 40 L10 100 L38 45 L28 45 L42 0 Z" fill="#f7f0e0"/><path d="M26 40 L50 30" stroke="#f7f0e0" stroke-width="1.4" fill="none"/><path d="M28 45 L4 60" stroke="#f7f0e0" stroke-width="1.4" fill="none"/></svg>
+<div class="scan"></div>
+<div class="blackout" id="blackout"></div>
 
 <div class="wrap">
   <section class="screen screen1 active" id="screen1">
     <p class="eyebrow">Signal detected</p>
-    <p class="prompt-name">DIANA, YOUR REALITY ENDS HERE.</p>
+    <p class="prompt-name">DIANA,<b>YOUR REALITY ENDS HERE.</b></p>
     <p class="prompt-q">THE NEXT CHAPTER AWAITS.</p>
-    <button class="btn" id="nextBtn">Next</button>
+    <button class="enter-link" id="enterBtn">[ ENTER ]</button>
   </section>
 
   <section class="screen screen2" id="screen2">
@@ -252,43 +245,46 @@
     <p class="prompt-name">DESTINATION SYNC: REQUIRED</p>
     <form class="pw-form" id="pwForm">
       <div class="coord-row">
-        <input class="pw-input coord-input" id="pwInputN" type="text" placeholder="00.0000 N" autocomplete="off" spellcheck="false">
-        <input class="pw-input coord-input" id="pwInputE" type="text" placeholder="00.0000 E" autocomplete="off" spellcheck="false">
+        <div class="coord-field">
+          <span class="coord-label">LATITUDE</span>
+          <input class="pw-input" id="pwInputN" type="text" placeholder="38.XXXX&deg; N" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="coord-field">
+          <span class="coord-label">LONGITUDE</span>
+          <input class="pw-input" id="pwInputE" type="text" placeholder="23.XXXX&deg; E" autocomplete="off" spellcheck="false">
+        </div>
       </div>
-      <p class="pw-error" id="pwError">Access denied. Check the coordinates.</p>
-      <button class="btn" type="submit">Unlock</button>
+      <p class="pw-error" id="pwError">ACCESS DENIED.<br>CHECK THE COORDINATES.</p>
+      <button class="enter-link" type="submit">[ LOCK COORDINATES ]</button>
     </form>
+  </section>
+
+  <section class="screen screen3" id="screen3">
+    <p class="ag-line ag-granted">ACCESS GRANTED</p>
+    <p class="ag-line ag-name">DIANA</p>
+    <p class="ag-line ag-journey">YOUR JOURNEY BEGINS HERE.</p>
   </section>
 
   <section class="screen screen4" id="screen4">
     <div class="zoom-stage">
       <p class="invite-line">YOU ARE INVITED TO</p>
       <div class="reveal-group">
-        <p class="presents">Anyma presents</p>
+        <p class="presents">ANYMA PRESENTS</p>
         <h1 class="wordmark">&AElig;DEN</h1>
         <p class="place">ATHENS</p>
+        <p class="date-line">31 OCTOBER 2026</p>
+        <p class="meta-line">Doors open 16:00 &middot; Olympic Athletic Center of Athens (OAKA), Marousi</p>
       </div>
     </div>
 
-    <div class="divider"></div>
-
-    <div class="details">
-      <div class="date">31 October 2026</div>
-      <div class="meta">Doors open 16:00<br>Olympic Athletic Center of Athens (OAKA), Marousi</div>
+    <div class="countdown-block">
+      <div class="countdown-row" id="countdown"><span id="d">--</span>:<span id="h">--</span>:<span id="m">--</span>:<span id="s">--</span></div>
+      <div class="countdown-caption">UNTIL ARRIVAL</div>
     </div>
 
-    <div class="countdown" id="countdown">
-      <div class="unit"><span class="unit-num" id="d">-</span><span class="unit-label">days</span></div>
-      <div class="unit"><span class="unit-num" id="h">-</span><span class="unit-label">hours</span></div>
-      <div class="unit"><span class="unit-num" id="m">-</span><span class="unit-label">min</span></div>
-      <div class="unit"><span class="unit-num" id="s">-</span><span class="unit-label">sec</span></div>
+    <div class="cta-block">
+      <a class="enter-link" href="event.ics" type="text/calendar">[ ADD TO CALENDAR ]</a>
     </div>
-
-    <div class="cta">
-      <a class="btn" href="event.ics" type="text/calendar">Add to calendar</a>
-    </div>
-
-    <div class="barcode" id="barcode"></div>
 
     <p class="footer">Somewhere between here and Athens.</p>
   </section>
@@ -300,7 +296,7 @@
     document.getElementById(id).classList.add('active');
   }
 
-  document.getElementById('nextBtn').addEventListener('click', function(){
+  document.getElementById('enterBtn').addEventListener('click', function(){
     showScreen('screen2');
   });
 
@@ -312,30 +308,29 @@
     var eRaw = eInput.value.replace(/[^0-9]/g, '');
     var ok = nRaw.indexOf('379838') !== -1 && eRaw.indexOf('237275') !== -1;
     if(ok){
-      document.getElementById('scene').classList.add('open');
+      var humanoid = document.getElementById('humanoid');
+      var blackout = document.getElementById('blackout');
+      blackout.classList.add('show');
+      setTimeout(function(){
+        humanoid.classList.add('intense');
+        showScreen('screen3');
+        blackout.classList.remove('show');
+      }, 550);
       setTimeout(function(){
         showScreen('screen4');
-      }, 1300);
+        humanoid.classList.remove('intense');
+        humanoid.classList.add('settled');
+      }, 5150);
       setTimeout(function(){
         document.getElementById('screen4').classList.add('settled');
-      }, 3000);
+      }, 6350);
     } else {
       document.getElementById('pwError').classList.add('show');
       [nInput, eInput].forEach(function(inp){
-        inp.classList.remove('error');
-        void inp.offsetWidth;
         inp.classList.add('error');
       });
     }
   });
-
-  var bc = document.getElementById('barcode');
-  for(var i=0;i<28;i++){
-    var s = document.createElement('span');
-    var h = 6 + Math.random()*14;
-    s.style.height = h+'px';
-    bc.appendChild(s);
-  }
 
   var target = new Date('2026-10-31T16:00:00+02:00').getTime();
   function tick(){
@@ -346,7 +341,7 @@
     var h = Math.floor((diff / (1000*60*60)) % 24);
     var m = Math.floor((diff / (1000*60)) % 60);
     var s = Math.floor((diff / 1000) % 60);
-    document.getElementById('d').textContent = d;
+    document.getElementById('d').textContent = String(d).padStart(2,'0');
     document.getElementById('h').textContent = String(h).padStart(2,'0');
     document.getElementById('m').textContent = String(m).padStart(2,'0');
     document.getElementById('s').textContent = String(s).padStart(2,'0');
